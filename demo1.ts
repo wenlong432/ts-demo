@@ -289,6 +289,179 @@ sayHello('xx'); //有效
 sayHello(['aa', 'bb']);
 // class 重载
 class Greeter {
-    
+  class Greeter {
+    message: string;
+
+    constructor(message: string) {
+        this.message = message;
+    }
+
+    // 重载
+    sayHi(name: string): string;
+    sayHi(names: string[]):ReadonlyArray<string>;
+
+    // 实现
+    sayHi(name: unknown): unknown {
+        if(typeof name === 'string') {
+            return  `${this.message}, ${name}`;
+        } else if(Array.isArray(name)) {
+            return name.map(name => `${this.message}, ${name}!`)
+        }
+
+        throw new Error('value is invalid');
+    }
 }
+console.log(new Greeter('hello').sayHi('Simon'));
+
+// 合并与扩展 是指与使用类型和接口相关的两个不同概念
+interface X {
+    a: string;
+}
+interface X {
+    b: number;
+}
+
+const person: X = {
+    a: 'a',
+    b: 7
+}
+interface Animal {
+    name: string;
+    eat(): void;
+}
+interface Bird extends Animal {
+    sing(): void
+}
+
+const dog: Bird = {
+    name: 'brain',
+    eat() {
+        console.log('eat');
+    },
+    sing() {
+        console.log('sing');
+    }
+}
+
+// 类型和接口之间的差异
+interface A {
+    x: string;
+}
+interface A {
+    y: string;
+}
+const j: A = {
+    x: 'xx',
+    y: 'yy'
+}
+interface B extends A {
+    z: string;
+}
+const car: B = {
+    x: 'x',
+    y: 'y',
+    z: 'z'
+}
+// 类型 使用 & 合并为单个类型
+interface C {
+    x: string;
+    y: number;
+}
+type D = C  & {
+    z: string
+}
+const Bus: D = {
+    x: 'x',
+    y: 1,
+    z: 'z'
+}
+// 类型
+type Department = 'dep-x' | 'dep-y'; // 并集
+type Person = {
+    name: string;
+    age: number
+};
+type Employee = {
+    id: number;
+    department: Department;
+}
+type EmployeeInfo = Person & Employee; // 交集
+// 接口
+interface Q {
+    x: 'x';
+}
+interface W {
+    w: 'w';
+}
+type E = Q | W;
+
+// Class TODO--------------------------------------------
+
+// 泛型允许您创建可与多种类型一起使用的可重用组件和函数
+// 泛型类型
+function identity<T>(arg: T): T {
+    return arg
+}
+const a = identity('x');
+const b = identity(123);
+const getLen = <T,>(data: ReadonlyArray<T>) => data.length;
+const len = getLen([1, 2]);
+// 泛型类 
+class Container<T> {
+    private item: T;
+
+    constructor(item:T) {
+        this.item = item;
+    }
+
+    getItem(): T {
+        return this.item
+    }
+}
+const numberContainer = new Container<number>(123);
+console.log(numberContainer.getItem());
+const stringContainer = new Container<string>('xx');
+console.log(stringContainer.getItem());
+// 泛型约束 使用关键字 extends 后跟类型参数必须满足的类型或接口来约束泛型参数
+const printLn = <T extends { length: number }>(value: T): void => {
+    console.log(value.length);
+}
+printLn('Hello');
+printLn([1, 2, 3]);
+printLn({length: 10});
+// printLn(1);
+// 高阶函数类型推断
+declare function pipe<A extends any[], B, C>(
+    ab: (...args: A) => B,
+    bc: (b: B) => C,
+) : (...args: A) => C;
+declare function list<T>(a: T): T[];
+declare function box<V>(x: V): { value: V};
+const listBox = pipe(list, box); 
+const boxList = pipe(box, list);
+// 泛型上下文缩小 允许编译器根据使用泛型参数的上下文来缩小泛型参数的类型，在条件语句中使用泛型类型时非常有用
+function process<T>(value: T): void {
+    if(typeof value === 'string') {
+        console.log(value.length);
+    } else if(typeof value === 'number') {
+        console.log(value.toFixed(2));
+    }
+}
+
+process('11');
+process(3.14);
+
+// 命名空间 用于将代码组织到逻辑容器中，防止命名冲突并提供一种将相关代码分组在一起的方法
+export namespace MyNamespace {
+  export interface MyInterface1 {
+      prop1: boolean;
+  }
+  export interface MyInterface2 {
+      prop2: string;
+  }
+}
+
+const P: MyNamespace.MyInterface1 = {
+  prop1: true,
+};
  
